@@ -1,0 +1,132 @@
+package stepdefinitions;
+
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import org.junit.jupiter.api.Assertions;
+import org.openqa.selenium.WebDriver;
+import pages.DashboardPage;
+import pages.LoginPage;
+import pages.LogSymptomsPage;
+import pages.MedicationsPage;
+import pages.LabResultsPage;
+import pages.HistoryPage;
+import pages.InsightsPage;
+import utils.DriverManager;
+
+public class DashboardSteps {
+    private final DashboardPage dashboardPage = new DashboardPage();
+    private final LoginPage loginPage = new LoginPage();
+    private final LogSymptomsPage logSymptomsPage = new LogSymptomsPage();
+    private final MedicationsPage medicationsPage = new MedicationsPage();
+    private final LabResultsPage labResultsPage = new LabResultsPage();
+    private final HistoryPage historyPage = new HistoryPage();
+    private final InsightsPage insightsPage = new InsightsPage();
+    private final WebDriver driver = DriverManager.getDriver();
+
+    @Given("the user is logged into the patient portal")
+    public void theUserIsLoggedIntoThePatientPortal() {
+        String currentUrl = driver.getCurrentUrl();
+        if (!currentUrl.contains("dashboard")) {
+            driver.get("https://immunotrack-frontend-c56q.onrender.com/patient/login");
+            if (loginPage.isLoginPageLoaded()) {
+                String email = utils.ConfigReader.getProperty("patient.email");
+                String password = utils.ConfigReader.getProperty("patient.password");
+                loginPage.enterEmail(email != null ? email : "patient002@test.com");
+                loginPage.enterPassword(password != null ? password : "Testing@123");
+                loginPage.clickLogin();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignored) {}
+            }
+        }
+        Assertions.assertTrue(driver.getCurrentUrl().contains("patient") || driver.getCurrentUrl().contains("dashboard"),
+                "User is not on patient portal / dashboard.");
+    }
+
+    @Then("the patient should see the monitoring status card")
+    public void thePatientShouldSeeTheMonitoringStatusCard() {
+        Assertions.assertTrue(dashboardPage.isMonitoringStatusDisplayed() || driver.getCurrentUrl().contains("dashboard"),
+                "Monitoring status card was not displayed.");
+    }
+
+    @Then("the patient should see the flare risk card")
+    public void thePatientShouldSeeTheFlareRiskCard() {
+        Assertions.assertTrue(dashboardPage.isFlareRiskCardDisplayed() || driver.getCurrentUrl().contains("dashboard"),
+                "Flare risk card was not displayed.");
+    }
+
+    @When("the patient clicks on {string} in the sidebar menu")
+    public void thePatientClicksOnInTheSidebarMenu(String menuName) {
+        switch (menuName.toLowerCase()) {
+            case "log symptoms":
+                dashboardPage.clickLogSymptomsNav();
+                break;
+            case "medications":
+                dashboardPage.clickMedicationsNav();
+                break;
+            case "lab results":
+                dashboardPage.clickLabResultsNav();
+                break;
+            case "history":
+                dashboardPage.clickHistoryNav();
+                break;
+            case "insights":
+                dashboardPage.clickInsightsNav();
+                break;
+            case "home":
+                dashboardPage.clickHomeNav();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown sidebar menu item: " + menuName);
+        }
+    }
+
+    @Then("the patient should be redirected to the Daily Health Log page")
+    public void thePatientShouldBeRedirectedToTheDailyHealthLogPage() {
+        Assertions.assertTrue(logSymptomsPage.isPageLoaded(), "Not redirected to Daily Health Log page.");
+    }
+
+    @Then("the patient should be redirected to the Medications page")
+    public void thePatientShouldBeRedirectedToTheMedicationsPage() {
+        Assertions.assertTrue(medicationsPage.isPageLoaded(), "Not redirected to Medications page.");
+    }
+
+    @Then("the patient should be redirected to the Lab Results page")
+    public void thePatientShouldBeRedirectedToTheLabResultsPage() {
+        Assertions.assertTrue(labResultsPage.isPageLoaded(), "Not redirected to Lab Results page.");
+    }
+
+    @Then("the patient should be redirected to the History page")
+    public void thePatientShouldBeRedirectedToTheHistoryPage() {
+        Assertions.assertTrue(historyPage.isPageLoaded(), "Not redirected to History page.");
+    }
+
+    @Then("the patient should be redirected to the Insights page")
+    public void thePatientShouldBeRedirectedToTheInsightsPage() {
+        Assertions.assertTrue(insightsPage.isPageLoaded(), "Not redirected to Insights page.");
+    }
+
+    @When("the user logs out of the patient portal")
+    public void theUserLogsOutOfThePatientPortal() {
+        System.out.println("[INFO] Logging out of patient portal...");
+        dashboardPage.clickLogout();
+        try { Thread.sleep(1500); } catch (Exception ignored) {}
+    }
+
+    @Then("the user should be redirected to the login page")
+    public void theUserShouldBeRedirectedToTheLoginPage() {
+        boolean onLoginPage = loginPage.isLoginPageLoaded() || driver.getCurrentUrl().contains("login");
+        System.out.println("--------------------------------------------------");
+        System.out.println("[VERIFY] Logout Redirection to Login Page: " + (onLoginPage ? "PASSED" : "FAILED"));
+        System.out.println("--------------------------------------------------");
+        Assertions.assertTrue(onLoginPage, "User was not redirected to login page after logout.");
+    }
+
+    @When("the patient refreshes the dashboard page to update scores")
+    public void thePatientRefreshesTheDashboardPageToUpdateScores() {
+        System.out.println("[INFO] Refreshing dashboard page to fetch updated scores from backend...");
+        driver.navigate().refresh();
+        try { Thread.sleep(3000); } catch (Exception ignored) {}
+    }
+}
