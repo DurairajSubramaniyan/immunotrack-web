@@ -28,7 +28,11 @@ public class DashboardSteps {
     public void theUserIsLoggedIntoThePatientPortal() {
         String currentUrl = driver.getCurrentUrl();
         if (!currentUrl.contains("dashboard")) {
-            driver.get("https://immunotrack-frontend-c56q.onrender.com/patient/login");
+            String patientUrl = utils.ConfigReader.getProperty("patient.url");
+            if (patientUrl == null || patientUrl.isEmpty()) {
+                patientUrl = "https://immunotrack-frontend-c56q.onrender.com/patient/login";
+            }
+            driver.get(patientUrl);
             if (loginPage.isLoginPageLoaded()) {
                 String email = utils.ConfigReader.getProperty("patient.email");
                 String password = utils.ConfigReader.getProperty("patient.password");

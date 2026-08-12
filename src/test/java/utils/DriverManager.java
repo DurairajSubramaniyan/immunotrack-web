@@ -28,8 +28,10 @@ public class DriverManager {
             switch (browser) {
                 case "chrome":
                     ChromeOptions chromeOptions = new ChromeOptions();
-                    // Add arguments for running headlessly if required, e.g., in CI:
-                    // chromeOptions.addArguments("--headless=new");
+                    String headlessProp = ConfigReader.getProperty("headless");
+                    if (headlessProp != null && headlessProp.equalsIgnoreCase("true")) {
+                        chromeOptions.addArguments("--headless=new");
+                    }
                     chromeOptions.addArguments("--disable-gpu");
                     chromeOptions.addArguments("--no-sandbox");
                     chromeOptions.addArguments("--disable-dev-shm-usage");

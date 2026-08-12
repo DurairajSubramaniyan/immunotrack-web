@@ -25,16 +25,32 @@ Feature: ImmunoTrack Daily Health Log Workflow
     Then the user should be redirected to the login page
 
     Examples:
-      | email                    | password    |
-      | immunotrack123@gmail.com | Testing@123 |
-# | immunotrack456@gmail.com | Testing@123 |
-# | patient001@test.com      | Testing@123 |
-# | patient002@test.com      | Testing@123 |
-# | patient003@test.com      | Testing@123 |
-# | patient004@test.com      | Testing@123 |
-# | patient005@test.com      | Testing@123 |
-# | patient006@test.com      | Testing@123 |
-#   Then the patient should be redirected to the Daily Health Log page
-#   When the user selects score ratings for symptoms
-#   And the user submits the daily health log
-#   Then the log should be successfully saved
+      | email                            | password        |
+      | immunotrack123@gmail.com         | Testing@123     |
+      | immunotrack456@gmail.com         | Testing@123     |
+      | patient001@test.com              | Testing@123     |
+      | patient002@test.com              | Testing@123     |
+      | patient003@test.com              | Testing@123     |
+      | patient004@test.com              | Testing@123     |
+      | patient005@test.com              | Testing@123     |
+      | patient006@test.com              | Testing@123     |
+      | patient007@test.com              | Testing@123     |
+      | patient020@gmail.com             | Testing@123     |
+      | patient002@gmail.com             | Testing@123     |
+      | patientaccount1@gmail.com        | Testing@123     |
+      | durairaj.subramaniyan@piquota.com | Testing@123     |
+      | karthikmech31@gmail.com          | Testing@123     |
+      | jokesapart003@gmail.com          | Immunotrack@123 |
+      | test03@gmail.com                 | Testing@123     |
+      | durairaj33@gmail.com             | Testing@123     |
+      | newpat@gmail.com                 | Testing@123     |
+      | patient030@gmail.com             | Testing@123     |
+      | testing01@gmail.com              | Testing@123     |
+      | patient010@test.com              | Testing@123     |
+      | patient008@test.com              | Testing@123     |
+      | testing02@gmail.com              | Testing@123     |
+      | testing12@gmail.com              | Testing@123     |
+      | patient001@gmail.com             | Testing@123     |
+      | durairajsmani@gmail.com          | Testing@123     |
+      | test0123@gmail.com               | Testing@123     |
+      | durai3@gmail.com                 | Testing@123     |

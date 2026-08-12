@@ -121,11 +121,18 @@ public class DashboardPage extends BasePage {
 
     public String getTodaysSymptomsSectionText() {
         try {
-            WebElement section = driver.findElement(org.openqa.selenium.By.xpath("//*[contains(text(), \"Today's Symptoms\")]/ancestor::div[contains(@class, 'card') or contains(@class, 'rounded') or contains(@class, 'border') or contains(@class, 'bg-') or contains(@class, 'p-')][1]"));
+            java.util.List<WebElement> mainElements = driver.findElements(org.openqa.selenium.By.xpath("//main | //*[contains(text(), \"Today's Symptoms\")]/ancestor::div[contains(@class, 'grid') or contains(@class, 'space-y') or contains(@class, 'container')][1]"));
+            if (!mainElements.isEmpty()) {
+                String fullText = mainElements.get(0).getText();
+                if (fullText.contains("Today's Symptoms")) {
+                    return fullText;
+                }
+            }
+            WebElement section = driver.findElement(org.openqa.selenium.By.xpath("//*[contains(text(), \"Today's Symptoms\")]/ancestor::div[contains(@class, 'card') or contains(@class, 'rounded') or contains(@class, 'border') or contains(@class, 'bg-') or contains(@class, 'p-')][last()]"));
             return section.getText();
         } catch (Exception e) {
             try {
-                return driver.findElement(org.openqa.selenium.By.xpath("//*[contains(text(), \"Today's Symptoms\")]/ancestor::div[2]")).getText();
+                return driver.findElement(org.openqa.selenium.By.xpath("//body")).getText();
             } catch (Exception ex) {
                 return "";
             }

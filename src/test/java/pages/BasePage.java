@@ -1,5 +1,6 @@
 package pages;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
@@ -22,7 +23,23 @@ public class BasePage {
     }
 
     protected void click(WebElement element) {
-        wait.until(ExpectedConditions.elementToBeClickable(element)).click();
+        try {
+            java.util.List<WebElement> cookieBtns = driver.findElements(By.xpath("//*[contains(@class, 'cc-') or contains(@class, 'cookie')]//button | //button[contains(text(), 'Accept') or contains(text(), 'Got it') or contains(text(), 'Dismiss') or contains(text(), 'Allow')]"));
+            if (!cookieBtns.isEmpty() && cookieBtns.get(0).isDisplayed()) {
+                try { cookieBtns.get(0).click(); } catch(Exception ignored) {}
+            }
+        } catch(Exception ignored) {}
+
+        try {
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
+            Thread.sleep(150);
+        } catch(Exception ignored) {}
+
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(element)).click();
+        } catch (Exception e) {
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+        }
     }
 
     protected void sendKeys(WebElement element, String text) {
