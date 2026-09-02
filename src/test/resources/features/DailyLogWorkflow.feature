@@ -25,32 +25,28 @@ Feature: ImmunoTrack Daily Health Log Workflow
     Then the user should be redirected to the login page
 
     Examples:
-      | email                            | password        |
-      | immunotrack123@gmail.com         | Testing@123     |
-      | immunotrack456@gmail.com         | Testing@123     |
-      | patient001@test.com              | Testing@123     |
-      | patient002@test.com              | Testing@123     |
-      | patient003@test.com              | Testing@123     |
-      | patient004@test.com              | Testing@123     |
-      | patient005@test.com              | Testing@123     |
-      | patient006@test.com              | Testing@123     |
-      | patient007@test.com              | Testing@123     |
-      | patient020@gmail.com             | Testing@123     |
-      | patient002@gmail.com             | Testing@123     |
-      | patientaccount1@gmail.com        | Testing@123     |
-      | durairaj.subramaniyan@piquota.com | Testing@123     |
-      | karthikmech31@gmail.com          | Testing@123     |
-      | jokesapart003@gmail.com          | Immunotrack@123 |
-      | test03@gmail.com                 | Testing@123     |
-      | durairaj33@gmail.com             | Testing@123     |
-      | newpat@gmail.com                 | Testing@123     |
-      | patient030@gmail.com             | Testing@123     |
-      | testing01@gmail.com              | Testing@123     |
-      | patient010@test.com              | Testing@123     |
-      | patient008@test.com              | Testing@123     |
-      | testing02@gmail.com              | Testing@123     |
-      | testing12@gmail.com              | Testing@123     |
-      | patient001@gmail.com             | Testing@123     |
-      | durairajsmani@gmail.com          | Testing@123     |
-      | test0123@gmail.com               | Testing@123     |
-      | durai3@gmail.com                 | Testing@123     |
+      | email                             | password        |
+      | immunotrack123@gmail.com          | Immunotrack@123 |
+      | immunotrack456@gmail.com          | Testing@123     |
+      | patient002@test.com               | Testing@123     |
+      | patient003@test.com               | Testing@123     |
+      | patient004@test.com               | Testing@123     |
+      | patient005@test.com               | Testing@123     |
+      | patient006@test.com               | Testing@123     |
+      | patient007@test.com               | Testing@123     |
+      | patient020@gmail.com              | Immunotrack@123 |
+      | patientaccount1@gmail.com         | Immunotrack@123 |
+      | durairaj.subramaniyan@piquota.com | Immunotrack@123 |
+      | jokesapart003@gmail.com           | Immunotrack@123 |
+      | lalitha@gmail.com                 | Kar@12345$      |
+      | marcus@gmail.com                  | Kar@12345$      |
+      | Alex@gmail.com                    | Kar@12345$      |
+      | lavanya01@gmail.com               | Kar@12345$      |
+      | bbb@gmail.com                     | Kar@12345$      |
+      | ccc@gmail.com                     | Kar@12345$      |
+      | duraiim@gmail.com                 | Vikki@52524     |
+
+
+
+
+

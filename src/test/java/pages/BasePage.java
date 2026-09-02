@@ -30,15 +30,16 @@ public class BasePage {
             }
         } catch(Exception ignored) {}
 
+        WebElement clickableElement = wait.until(ExpectedConditions.elementToBeClickable(element));
         try {
-            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", clickableElement);
             Thread.sleep(150);
         } catch(Exception ignored) {}
 
         try {
-            wait.until(ExpectedConditions.elementToBeClickable(element)).click();
+            clickableElement.click();
         } catch (Exception e) {
-            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", clickableElement);
         }
     }
 

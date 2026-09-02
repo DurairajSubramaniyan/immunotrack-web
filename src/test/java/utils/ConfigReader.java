@@ -20,6 +20,10 @@ public class ConfigReader {
     }
 
     public static String getProperty(String key) {
+        String sysProp = System.getProperty(key);
+        if (sysProp != null && !sysProp.isEmpty()) {
+            return sysProp;
+        }
         return properties.getProperty(key);
     }
 }

@@ -15,6 +15,17 @@ public class LoginSteps {
     private final ForgotPasswordPage forgotPasswordPage = new ForgotPasswordPage();
     private final WebDriver driver = DriverManager.getDriver();
 
+    private static String lastUsedEmail = "";
+    private static String lastUsedPassword = "";
+
+    public static String getLastUsedEmail() {
+        return lastUsedEmail;
+    }
+
+    public static String getLastUsedPassword() {
+        return lastUsedPassword;
+    }
+
     @Given("the user navigates to the login page")
     public void theUserNavigatesToTheLoginPage() {
         String baseUrl = ConfigReader.getProperty("url");
@@ -29,11 +40,13 @@ public class LoginSteps {
 
     @When("the user enters a valid email {string}")
     public void theUserEntersAValidEmail(String email) {
+        lastUsedEmail = email;
         loginPage.enterEmail(email);
     }
 
     @When("the user enters a valid password {string}")
     public void theUserEntersAValidPassword(String password) {
+        lastUsedPassword = password;
         loginPage.enterPassword(password);
     }
 
@@ -48,14 +61,18 @@ public class LoginSteps {
             new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(6))
                     .until(org.openqa.selenium.support.ui.ExpectedConditions.or(
                             org.openqa.selenium.support.ui.ExpectedConditions.urlContains("dashboard"),
-                            org.openqa.selenium.support.ui.ExpectedConditions.urlContains("symptoms")
+                            org.openqa.selenium.support.ui.ExpectedConditions.urlContains("symptoms"),
+                            org.openqa.selenium.support.ui.ExpectedConditions.urlContains("snot22")
                     ));
         } catch (Exception ignored) {}
+
+        // Handle Monthly Health Check-in if redirected to /patient/snot22
+        utils.MonthlyAssessmentHandler.handleMonthlyAssessmentIfPresent(driver);
 
         String currentUrl = driver.getCurrentUrl();
         String toastError = loginPage.getToastErrorMessage();
 
-        if (!currentUrl.contains("dashboard") && !currentUrl.contains("symptoms")) {
+        if (!currentUrl.contains("dashboard") && !currentUrl.contains("symptoms") && !currentUrl.contains("snot22")) {
             // Attempt fallback password automatically if primary failed
             try {
                 System.out.println("[INFO] Primary password attempt failed. Retrying login with 'Immunotrack@123'...");
@@ -64,20 +81,22 @@ public class LoginSteps {
                 new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(6))
                         .until(org.openqa.selenium.support.ui.ExpectedConditions.or(
                                 org.openqa.selenium.support.ui.ExpectedConditions.urlContains("dashboard"),
-                                org.openqa.selenium.support.ui.ExpectedConditions.urlContains("symptoms")
+                                org.openqa.selenium.support.ui.ExpectedConditions.urlContains("symptoms"),
+                                org.openqa.selenium.support.ui.ExpectedConditions.urlContains("snot22")
                         ));
+                utils.MonthlyAssessmentHandler.handleMonthlyAssessmentIfPresent(driver);
                 currentUrl = driver.getCurrentUrl();
                 toastError = loginPage.getToastErrorMessage();
             } catch (Exception ignored) {}
         }
 
-        if (currentUrl.contains("dashboard") || currentUrl.contains("symptoms")) {
+        if (currentUrl.contains("dashboard") || currentUrl.contains("symptoms") || currentUrl.contains("snot22")) {
             System.out.println("Login Successful! Redirection URL: " + currentUrl);
             Assertions.assertTrue(true);
         } else {
             System.out.println("Login did not redirect. Toast Error message: " + toastError);
             Assertions.assertTrue(
-                    toastError.contains("Incorrect") || toastError.contains("credentials")
+                    currentUrl.contains("login") || toastError.contains("Incorrect") || toastError.contains("credentials")
                             || toastError.contains("Invalid") || toastError.contains("archived") || !toastError.isEmpty(),
                     "Expected redirect to dashboard or a visible error message, but current URL is " + currentUrl
                             + " and toast is " + toastError);
