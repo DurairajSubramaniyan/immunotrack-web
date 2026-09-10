@@ -22,7 +22,18 @@ public class BasePage {
         PageFactory.initElements(driver, this);
     }
 
+    protected void waitForPageReady() {
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(30)).until(
+                webDriver -> ((org.openqa.selenium.JavascriptExecutor) webDriver)
+                    .executeScript("return document.readyState").equals("complete")
+            );
+        } catch (Exception ignored) {}
+    }
+
     protected void click(WebElement element) {
+        waitForPageReady();
+
         try {
             java.util.List<WebElement> cookieBtns = driver.findElements(By.xpath("//*[contains(@class, 'cc-') or contains(@class, 'cookie')]//button | //button[contains(text(), 'Accept') or contains(text(), 'Got it') or contains(text(), 'Dismiss') or contains(text(), 'Allow')]"));
             if (!cookieBtns.isEmpty() && cookieBtns.get(0).isDisplayed()) {
@@ -30,7 +41,25 @@ public class BasePage {
             }
         } catch(Exception ignored) {}
 
-        WebElement clickableElement = wait.until(ExpectedConditions.elementToBeClickable(element));
+        WebElement clickableElement = null;
+        Exception lastException = null;
+        int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                clickableElement = wait.until(ExpectedConditions.elementToBeClickable(element));
+                break;
+            } catch (Exception e) {
+                lastException = e;
+                if (attempt < maxAttempts) {
+                    waitForPageReady();
+                    try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+                }
+            }
+        }
+        if (clickableElement == null) {
+            throw new RuntimeException("Element not clickable after " + maxAttempts + " attempts", lastException);
+        }
+
         try {
             ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", clickableElement);
             Thread.sleep(150);

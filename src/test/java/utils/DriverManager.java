@@ -40,6 +40,29 @@ public class DriverManager {
                     chromeOptions.addArguments("--disable-single-click-autofill");
                     chromeOptions.addArguments("--disable-features=AutofillServerCommunication");
                     chromeOptions.addArguments("--disable-save-password-bubble");
+
+                    // Auto-approve browser notification permission requests.
+                    // Without this, Chrome shows a native "Allow notifications?"
+                    // popup that Selenium cannot interact with. If the app's
+                    // "Push Notifications" toggle depends on the Notification
+                    // permission actually being granted (checking
+                    // Notification.permission === 'granted' before it will flip
+                    // its internal state to true), the toggle click will appear
+                    // to do nothing - it's stuck because the permission prompt
+                    // was silently left unanswered ("default"), not because the
+                    // click itself failed.
+                    java.util.Map<String, Object> chromePrefs = new java.util.HashMap<>();
+                    chromePrefs.put("profile.default_content_setting_values.notifications", 1); // 1 = allow, 2 = block
+                    chromeOptions.setExperimentalOption("prefs", chromePrefs);
+                    // NOTE: Do NOT add "--disable-notifications" here (with or
+                    // without "=false"). Chromium switches like this are
+                    // boolean-by-presence - appending "=false" does not negate
+                    // it, it still disables the Notification API entirely,
+                    // which is the opposite of what we want and silently makes
+                    // any "enable push notifications" toggle impossible to
+                    // turn on. The "prefs" map above is the correct way to
+                    // pre-grant the permission.
+
                     driver = new ChromeDriver(chromeOptions);
                     break;
                 // case "firefox":
