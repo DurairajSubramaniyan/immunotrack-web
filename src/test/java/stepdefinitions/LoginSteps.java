@@ -20,13 +20,8 @@ public class LoginSteps {
     private static String lastUsedEmail = "";
     private static String lastUsedPassword = "";
 
-    public static String getLastUsedEmail() {
-        return lastUsedEmail;
-    }
-
-    public static String getLastUsedPassword() {
-        return lastUsedPassword;
-    }
+    public static String getLastUsedEmail() { return lastUsedEmail; }
+    public static String getLastUsedPassword() { return lastUsedPassword; }
 
     @Given("the user navigates to the login page")
     public void theUserNavigatesToTheLoginPage() {
@@ -59,68 +54,72 @@ public class LoginSteps {
 
     @Then("the user should see the dashboard page or a login error if credentials are mock")
     public void theUserShouldSeeTheDashboardPageOrALoginErrorIfCredentialsAreMock() {
-        // Render free/hobby-tier backends cold-start after idle time and can take
-        // well over 6 seconds to respond to the first request. A short wait here
-        // misreads a slow-but-successful login as a failure, then wastes the
-        // fallback-password attempt on a server that hasn't finished waking up.
-        final Duration REDIRECT_WAIT = Duration.ofSeconds(45);
+        final Duration REDIRECT_WAIT = Duration.ofSeconds(90);
 
-        try {
-            new org.openqa.selenium.support.ui.WebDriverWait(driver, REDIRECT_WAIT)
-                    .until(org.openqa.selenium.support.ui.ExpectedConditions.or(
-                            org.openqa.selenium.support.ui.ExpectedConditions.urlContains("dashboard"),
-                            org.openqa.selenium.support.ui.ExpectedConditions.urlContains("symptoms"),
-                            org.openqa.selenium.support.ui.ExpectedConditions.urlContains("snot22")
-                    ));
-        } catch (Exception ignored) {}
+        boolean loggedIn = waitForLoginSuccess(REDIRECT_WAIT);
 
-        // Handle Monthly Health Check-in if redirected to /patient/snot22
         utils.MonthlyAssessmentHandler.handleMonthlyAssessmentIfPresent(driver);
 
         String currentUrl = driver.getCurrentUrl();
-        String toastError = loginPage.getToastErrorMessage();
 
-        if (!currentUrl.contains("dashboard") && !currentUrl.contains("symptoms") && !currentUrl.contains("snot22")) {
-            // Attempt fallback password automatically if primary failed
+        if (!isOnDashboard(currentUrl)) {
+            // Cold start retry — submit login again and wait longer
+            System.out.println("[INFO] Cold start suspected. Resubmitting login...");
             try {
-                System.out.println("[INFO] Primary password attempt failed. Retrying login with 'Immunotrack@123'...");
-                loginPage.enterPassword("Immunotrack@123");
                 loginPage.clickLogin();
-                new org.openqa.selenium.support.ui.WebDriverWait(driver, REDIRECT_WAIT)
-                        .until(org.openqa.selenium.support.ui.ExpectedConditions.or(
-                                org.openqa.selenium.support.ui.ExpectedConditions.urlContains("dashboard"),
-                                org.openqa.selenium.support.ui.ExpectedConditions.urlContains("symptoms"),
-                                org.openqa.selenium.support.ui.ExpectedConditions.urlContains("snot22")
-                        ));
+                waitForLoginSuccess(REDIRECT_WAIT);
                 utils.MonthlyAssessmentHandler.handleMonthlyAssessmentIfPresent(driver);
                 currentUrl = driver.getCurrentUrl();
-                toastError = loginPage.getToastErrorMessage();
             } catch (Exception ignored) {}
         }
 
-        if (currentUrl.contains("dashboard") || currentUrl.contains("symptoms") || currentUrl.contains("snot22")) {
+        if (!isOnDashboard(currentUrl)) {
+            // Fallback password retry
+            System.out.println("[INFO] Primary password attempt failed. Retrying login with 'Immunotrack@123'...");
+            try {
+                loginPage.enterPassword("Immunotrack@123");
+                loginPage.clickLogin();
+                waitForLoginSuccess(REDIRECT_WAIT);
+                utils.MonthlyAssessmentHandler.handleMonthlyAssessmentIfPresent(driver);
+                currentUrl = driver.getCurrentUrl();
+            } catch (Exception ignored) {}
+        }
+
+        String toastError = loginPage.getToastErrorMessage();
+
+        if (isOnDashboard(currentUrl)) {
             System.out.println("Login Successful! Redirection URL: " + currentUrl);
             Assertions.assertTrue(true);
         } else {
-            System.out.println("Login did not redirect. Toast Error message: " + toastError);
-            // Require actual evidence of a real error message here - being "still
-            // on the login page" is not evidence, it's the default state whenever
-            // login hasn't succeeded yet (including mid cold-start). Without this,
-            // the assertion passes on ANY failure for ANY reason, silently masking
-            // real problems (e.g. both credentials rejected, backend down/slow)
-            // as if they were the expected "mock credentials" case.
+            System.out.println("Login did not redirect. Toast: " + toastError);
             Assertions.assertTrue(
-                    !toastError.isEmpty()
-                            && (toastError.toLowerCase().contains("incorrect")
-                                || toastError.toLowerCase().contains("credentials")
-                                || toastError.toLowerCase().contains("invalid")
-                                || toastError.toLowerCase().contains("archived")),
-                    "Expected redirect to dashboard or a visible login error message, but current URL is "
-                            + currentUrl + " and toast is '" + toastError + "' (empty toast after "
-                            + REDIRECT_WAIT.getSeconds() + "s suggests a real failure - e.g. backend "
-                            + "unreachable/still cold-starting, or account credentials genuinely changed - "
-                            + "not a normal 'mock credentials rejected' case)");
+                !toastError.isEmpty()
+                    && (toastError.toLowerCase().contains("incorrect")
+                        || toastError.toLowerCase().contains("credentials")
+                        || toastError.toLowerCase().contains("invalid")
+                        || toastError.toLowerCase().contains("archived")),
+                "Expected redirect to dashboard or a visible login error message, but current URL is "
+                    + currentUrl + " and toast is '" + toastError + "' (empty toast after "
+                    + REDIRECT_WAIT.getSeconds() + "s suggests backend cold-starting or credentials changed)");
         }
+    }
+
+    private boolean waitForLoginSuccess(Duration timeout) {
+        try {
+            new org.openqa.selenium.support.ui.WebDriverWait(driver, timeout)
+                .until(org.openqa.selenium.support.ui.ExpectedConditions.or(
+                    org.openqa.selenium.support.ui.ExpectedConditions.urlContains("dashboard"),
+                    org.openqa.selenium.support.ui.ExpectedConditions.urlContains("symptoms"),
+                    org.openqa.selenium.support.ui.ExpectedConditions.urlContains("snot22")
+                ));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isOnDashboard(String url) {
+        return url.contains("dashboard") || url.contains("symptoms") || url.contains("snot22");
     }
 
     @When("the user enters email {string} and password {string}")
@@ -131,34 +130,23 @@ public class LoginSteps {
 
     @Then("the user should see an error notification containing {string}")
     public void theUserShouldSeeAnErrorNotificationContaining(String expectedError) {
-        // Retrieve HTML5 browser validations
         String emailValidation = loginPage.getEmailValidationMessage();
         String passwordValidation = loginPage.getPasswordValidationMessage();
-
-        // Retrieve page toast error
         String toastError = loginPage.getToastErrorMessage();
 
-        System.out.println("Validation check details - Expected: " + expectedError);
-        System.out.println("  Email field validation message: " + emailValidation);
-        System.out.println("  Password field validation message: " + passwordValidation);
-        System.out.println("  Page toast error: " + toastError);
+        System.out.println("Validation check - Expected: " + expectedError);
+        System.out.println("  Email validation: " + emailValidation);
+        System.out.println("  Password validation: " + passwordValidation);
+        System.out.println("  Toast error: " + toastError);
 
-        boolean matchFound = false;
-
-        // Check if browser native validation contains expected error
-        if (emailValidation != null && emailValidation.toLowerCase().contains(expectedError.toLowerCase())) {
-            matchFound = true;
-        } else if (passwordValidation != null
-                && passwordValidation.toLowerCase().contains(expectedError.toLowerCase())) {
-            matchFound = true;
-        } else if (toastError != null && toastError.toLowerCase().contains(expectedError.toLowerCase())) {
-            matchFound = true;
-        }
+        boolean matchFound =
+            (emailValidation != null && emailValidation.toLowerCase().contains(expectedError.toLowerCase())) ||
+            (passwordValidation != null && passwordValidation.toLowerCase().contains(expectedError.toLowerCase())) ||
+            (toastError != null && toastError.toLowerCase().contains(expectedError.toLowerCase()));
 
         Assertions.assertTrue(matchFound,
-                String.format(
-                        "Expected error containing '%s', but got: Email Validation='%s', Password Validation='%s', Toast Error='%s'",
-                        expectedError, emailValidation, passwordValidation, toastError));
+            String.format("Expected error containing '%s', but got: Email='%s', Password='%s', Toast='%s'",
+                expectedError, emailValidation, passwordValidation, toastError));
     }
 
     @When("the user clicks the Forgot Password link")
@@ -170,6 +158,6 @@ public class LoginSteps {
     public void theUserShouldSeeTheForgotPasswordRecoveryPage() {
         Assertions.assertTrue(forgotPasswordPage.isPageLoaded(), "Forgot Password recovery page failed to load.");
         Assertions.assertTrue(driver.getCurrentUrl().contains("forgot-password"),
-                "Expected URL to contain 'forgot-password' but got: " + driver.getCurrentUrl());
+            "Expected URL to contain 'forgot-password' but got: " + driver.getCurrentUrl());
     }
 }

@@ -5,6 +5,7 @@ Feature: ImmunoTrack Export My Record
     When the user enters a valid email "pavithrasaravanakumar29@gmail.com"
     And the user enters a valid password "Pavithra@29#2006pavi"
     And the user clicks the Log In button
+    Then the user should see the dashboard page or a login error if credentials are mock
 
   @profile @exportRecord
   Scenario: Verify user can export their full health record

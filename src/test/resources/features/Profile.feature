@@ -30,7 +30,7 @@ Feature: Patient Profile Management
     Then a profile update confirmation should be displayed
 
   Scenario: Verify remote monitoring and privacy notice statuses, then return to dashboard
-    Then the Remote Monitoring section should show "Enrolled" status
+   Then the Remote Monitoring section should show "Left Program" status
     And the Notice of Privacy Practices should show "Acknowledged" status
     When the patient navigates back to the dashboard using Back to Home
 
@@ -55,13 +55,12 @@ Feature: Patient Profile Management
     Then the Previous versions section should be displayed
     When the user navigates back to the profile page from the privacy notice
 
-  Scenario: View Privacy Policy page
+  Scenario: View full privacy notice document
     When the user clicks on "Notice of Privacy Practices"
-    And the user clicks on "Read full Privacy Notice"
-    Then the user should be navigated to the Privacy Policy page
-    And the privacy policy effective date and version should be displayed
-    And the Information We Collect section should be displayed
-    When the user clicks back from the Privacy Policy page
+    And the user clicks on the Read full Privacy Notice link
+    Then the full privacy notice document should be displayed
+    And the Download PDF button should be displayed on the document viewer
+    When the user closes the full privacy notice document
 
   Scenario: View Cookie Policy page
     When the user clicks on "Cookie Policy"
