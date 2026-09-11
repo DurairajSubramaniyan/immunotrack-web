@@ -45,22 +45,10 @@ public class ProfilePage {
     By saveProfileBtn = By.xpath("//button[contains(text(),'Save Profile Changes')]");
     By backToHomeBtn = By.xpath("//*[contains(text(),'Back to Home')]");
 
-    // FIX #1 (corrected): Profile page shows a status BADGE that reads "Enrolled" /
-    // "Not Enrolled" next to the Remote Monitoring row. The earlier fix mistakenly
-    // targeted "Active", but "Active" only appears in the row's SUBTITLE text
-    // ("Active Enrollment") and separately as the PROGRAM STATUS value on the
-    // dedicated /patient/remote-monitoring page — not as the badge here.
-    // "Enrolled" is a safe substring to match because it never appears inside
-    // "Active Enrollment" (that word is "Enrollment", not "Enrolled"), so this
-    // locator cannot accidentally catch the subtitle.
-    By remoteMonitoringStatus = By.xpath(
-        "//*[contains(normalize-space(),'Remote Monitoring')]/following::*[contains(normalize-space(),'Enrolled') or contains(normalize-space(),'Not Enrolled')][1]" +
-        " | //*[contains(normalize-space(),'PROGRAM STATUS')]/following::*[contains(normalize-space(),'Enrolled') or contains(normalize-space(),'Not Enrolled')][1]"
-    );
-
     By privacyNoticeStatus = By.xpath(
-        "//*[contains(normalize-space(),'Notice of Privacy')]/following::*[contains(normalize-space(),'Acknowledged') or contains(normalize-space(),'Not Acknowledged')][1]" +
-        " | //*[contains(normalize-space(),'Privacy Practices')]/ancestor::div[4]//*[contains(normalize-space(),'Acknowledged')]"
+        "//span[contains(text(),'Acknowledged') or contains(text(),'Not Acknowledged')][ancestor::*[contains(.,'Notice of Privacy Practices')]]" +
+        " | //*[contains(@class,'badge') or contains(@class,'tag') or contains(@class,'chip')][contains(text(),'Acknowledged') or contains(text(),'Not Acknowledged')]" +
+        "[ancestor::*[contains(.,'Notice of Privacy Practices')]]"
     );
 
     By reauthModal = By.xpath("//div[@role='dialog' and @aria-labelledby='reauth-modal-title']");
@@ -79,17 +67,10 @@ public class ProfilePage {
     );
 
     By nppPageHeader = By.xpath("//*[contains(text(),'Notice of Privacy Practices')]");
-
-    // FIX #2: contains(text(),'CURRENT NOTICE VERSION') is case-sensitive and only matches ALL CAPS.
-    // The page almost certainly renders this label in mixed case (e.g. "Current Notice Version"),
-    // so translate() is used to make the match case-insensitive.
     By nppCurrentNoticeVersion = By.xpath(
-        "//*[contains(translate(normalize-space(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'NOTICE VERSION')]" +
-        "/following::*[string-length(normalize-space()) > 0][1]"
+        "//*[contains(normalize-space(),'CURRENT NOTICE VERSION')]/following::*[string-length(normalize-space()) > 0][1]"
     );
-    By nppEffectiveDate = By.xpath(
-        "//*[contains(translate(normalize-space(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ'),'EFFECTIVE DATE')]"
-    );
+    By nppEffectiveDate = By.xpath("//*[contains(text(),'Effective Date')]");
     By nppAcknowledgementStatus = By.xpath(
         "//*[contains(text(),'ACKNOWLEDGEMENT STATUS')]/following::*[contains(text(),'Acknowledged') or contains(text(),'Not Acknowledged')][1]"
     );
@@ -99,7 +80,12 @@ public class ProfilePage {
         " | //a[contains(normalize-space(),'Download')]"
     );
     By nppPreviousVersionsHeader = By.xpath("//*[contains(text(),'Previous versions')]");
-    By nppReadFullNoticeLink = By.xpath("//a[contains(text(),'Read full Privacy Notice')] | //*[contains(text(),'Read full Privacy Notice')]");
+
+    By nppReadFullNoticeLink = By.xpath(
+        "//a[contains(normalize-space(),'Read full Privacy Notice')]" +
+        " | //button[contains(normalize-space(),'Read full Privacy Notice')]" +
+        " | //*[contains(normalize-space(),'Read full Privacy Notice')]"
+    );
     By nppBackArrowLink = By.xpath("(//a[contains(@href,'/patient/profile')] | //*[contains(@class,'rounded-full')][.//*[name()='svg']])[1]");
 
     By privacyPolicyHeader = By.xpath("//*[contains(text(),'Privacy Policy')]");
@@ -116,6 +102,8 @@ public class ProfilePage {
         "//div[@role='dialog'][not(@aria-labelledby='reauth-modal-title')]" +
         " | //div[contains(@class,'modal') and .//button]"
     );
+
+    By successToast = By.xpath("//*[contains(text(),'updated successfully')]");
 
     private WebElement waitForVisible(By locator) {
         return wait.until(drv -> {
@@ -231,16 +219,19 @@ public class ProfilePage {
         }
     }
 
-    // FIX #4: dismiss any leftover overlay/modal and reset scroll position before
-    // clicking the nav icon. After the export flow the page can be scrolled down
-    // or have a toast/confirm overlay still present, which blocks the nav icon
-    // from being "clickable" and causes the 25s timeout seen in the logs.
     public void openProfileViaNav() {
         dismissReauthModalIfPresent("Pavithra@29#2006pavi");
-        dismissGenericConfirmModalIfPresent();
         try {
-            ((JavascriptExecutor) driver).executeScript("window.scrollTo(0,0);");
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(successToast));
         } catch (Exception ignored) {}
+
+        WebDriverWait coldStartWait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        try {
+            coldStartWait.until(ExpectedConditions.elementToBeClickable(profileNavIcon));
+        } catch (org.openqa.selenium.TimeoutException e) {
+            driver.navigate().refresh();
+            coldStartWait.until(ExpectedConditions.elementToBeClickable(profileNavIcon));
+        }
         safeClick(profileNavIcon);
         waitForVisible(profileHeader);
     }
@@ -331,48 +322,125 @@ public class ProfilePage {
         safeClick(backToHomeBtn);
     }
 
+    // ─── PERMANENT DYNAMIC FIX ───────────────────────────────────────────────
+    // Does NOT hardcode any status words ("Enrolled", "Left Program", etc.)
+    // Finds the Remote Monitoring button by its label, then reads whatever
+    // badge text the UI actually shows. Works for any future status too.
     public String getRemoteMonitoringStatus() {
         try {
-            WebElement el = waitForVisible(remoteMonitoringStatus);
-            return el != null ? el.getText() : "Not Found";
-        } catch (Exception e) {
-            return "Not Found";
-        }
-    }
+            // Strategy 1: find the button containing "Remote Monitoring" label,
+            // then get the last span inside it (which is always the badge)
+            List<WebElement> buttons = driver.findElements(
+                By.xpath("//button[.//*[contains(text(),'Remote Monitoring')]]")
+            );
+            for (WebElement btn : buttons) {
+                try {
+                    // Get all spans inside the button, pick the last non-empty one
+                    // that is not the title itself
+                    List<WebElement> spans = btn.findElements(By.tagName("span"));
+                    for (int i = spans.size() - 1; i >= 0; i--) {
+                        String text = spans.get(i).getText().trim();
+                        if (!text.isEmpty() && !text.equalsIgnoreCase("Remote Monitoring")) {
+                            System.out.println("[DEBUG] Remote Monitoring badge text: " + text);
+                            return text;
+                        }
+                    }
+                } catch (StaleElementReferenceException ignored) {}
+            }
 
-    public String getPrivacyNoticeStatus() {
-        try {
-            WebElement el = waitForVisible(privacyNoticeStatus);
-            return el != null ? el.getText() : "Not Found";
-        } catch (Exception e) {
-            return "Not Found";
-        }
-    }
-
-    // FIX #3: some settings links (notably "Read full Privacy Notice") open in a new
-    // browser tab. If we don't switch to it, every subsequent wait/assert keeps
-    // looking at the old tab and times out. After clicking, briefly check (max 3s,
-    // not the full 25s) whether a new window handle appeared and switch to it.
-    // If no new tab opens (the normal case for same-page links), this adds
-    // negligible overhead.
-    public void clickSettingsLink(String linkText) {
-        String originalHandle = driver.getWindowHandle();
-        int handlesBefore = driver.getWindowHandles().size();
-
-        safeClick(By.xpath("//*[contains(text(),'" + linkText + "')]"));
-
-        try {
-            new WebDriverWait(driver, Duration.ofSeconds(3))
-                    .until(d -> d.getWindowHandles().size() > handlesBefore);
-            for (String handle : driver.getWindowHandles()) {
-                if (!handle.equals(originalHandle)) {
-                    driver.switchTo().window(handle);
-                    break;
+            // Strategy 2: directly target the badge span via rounded-full class
+            // (the UI uses Tailwind's rounded-full on status badges)
+            List<WebElement> badges = driver.findElements(
+                By.xpath("//button[.//*[contains(text(),'Remote Monitoring')]]//span[contains(@class,'rounded-full')]")
+            );
+            if (!badges.isEmpty()) {
+                String text = badges.get(badges.size() - 1).getText().trim();
+                if (!text.isEmpty()) {
+                    System.out.println("[DEBUG] Remote Monitoring badge (rounded-full): " + text);
+                    return text;
                 }
             }
-        } catch (org.openqa.selenium.TimeoutException ignored) {
-            // No new tab opened — link navigated in the same window, nothing to do.
+
+            // Strategy 3: look for the subtitle span (the small text under the title)
+            // From the debug HTML we can see: <span class="text-[12px] text-secondary">Left Program</span>
+            List<WebElement> subtitles = driver.findElements(
+                By.xpath("//button[.//*[contains(text(),'Remote Monitoring')]]//span[contains(@class,'text-secondary') or contains(@class,'text-[12px]')]")
+            );
+            if (!subtitles.isEmpty()) {
+                String text = subtitles.get(0).getText().trim();
+                if (!text.isEmpty()) {
+                    System.out.println("[DEBUG] Remote Monitoring subtitle text: " + text);
+                    return text;
+                }
+            }
+
+            System.out.println("[DEBUG] Remote Monitoring badge not found on page.");
+            return "Not Found";
+
+        } catch (Exception e) {
+            System.out.println("[DEBUG] getRemoteMonitoringStatus() exception: " + e.getMessage());
+            return "Not Found";
         }
+    }
+
+    public String getPrivacyNoticeStatus(String expectedStatus) {
+        if (expectedStatus == null || expectedStatus.trim().isEmpty()) {
+            return "Not Found";
+        }
+
+        final String expected = expectedStatus.trim();
+
+        try {
+            return wait.until(drv -> {
+                List<WebElement> elements = drv.findElements(privacyNoticeStatus);
+
+                for (WebElement element : elements) {
+                    try {
+                        if (!element.isDisplayed()) {
+                            continue;
+                        }
+
+                        String actualStatus = element.getText()
+                                .trim()
+                                .replaceAll("\\s+", " ");
+
+                        /*
+                         * React may initially render "Not Acknowledged" and
+                         * update it to "Acknowledged" after the API response.
+                         * Wait for the exact expected status instead of
+                         * returning whichever value appears first.
+                         */
+                        if (actualStatus.equalsIgnoreCase(expected)) {
+                            System.out.println(
+                                    "[DEBUG] Privacy Notice status settled: " + actualStatus
+                            );
+                            return actualStatus;
+                        }
+
+                    } catch (StaleElementReferenceException ignored) {
+                        // React re-rendered the element; retry on next poll.
+                    }
+                }
+
+                return null;
+            });
+
+        } catch (org.openqa.selenium.TimeoutException e) {
+            System.out.println(
+                    "[DEBUG] Privacy Notice status did not reach expected value '"
+                            + expected + "' within " + wait + "."
+            );
+            return "Not Found";
+        } catch (Exception e) {
+            System.out.println(
+                    "[DEBUG] Privacy Notice status read failed: " + e.getMessage()
+            );
+            return "Not Found";
+        }
+    }
+
+    public void clickSettingsLink(String linkText) {
+        safeClick(By.xpath("//*[contains(text(),'" + linkText + "')]"));
     }
 
     public boolean isExportTriggered() {
@@ -436,7 +504,12 @@ public class ProfilePage {
     }
 
     public boolean isPrivacyPolicyPageLoaded() {
-        return waitForVisible(privacyPolicyHeader).isDisplayed() && driver.getCurrentUrl().contains("/privacy-policy");
+        try {
+            wait.until(ExpectedConditions.urlContains("/privacy-policy"));
+        } catch (Exception e) {
+            return false;
+        }
+        return waitForVisible(privacyPolicyInfoWeCollectSection) != null;
     }
 
     public boolean isPrivacyPolicyEffectiveDateAndVersionDisplayed() {

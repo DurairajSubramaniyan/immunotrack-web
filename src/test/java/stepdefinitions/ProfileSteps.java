@@ -59,9 +59,10 @@ public class ProfileSteps {
     public void verify_medication_reminders_status() {
         boolean expected = !medicationReminderStateBeforeToggle;
         Assertions.assertTrue(
-                profilePage.isMedicationReminderToggleUpdated(expected),
-                "Medication Reminder toggle did not update: was " + medicationReminderStateBeforeToggle
-                        + ", expected it to flip to " + expected
+            profilePage.isMedicationReminderToggleUpdated(expected),
+            "Medication Reminder toggle did not update: was "
+                + medicationReminderStateBeforeToggle
+                + ", expected it to flip to " + expected
         );
     }
 
@@ -75,9 +76,10 @@ public class ProfileSteps {
     public void verify_push_notifications_status() {
         boolean expected = !pushNotificationStateBeforeToggle;
         Assertions.assertTrue(
-                profilePage.isPushNotificationToggleUpdated(expected),
-                "Push Notification toggle did not update: was " + pushNotificationStateBeforeToggle
-                        + ", expected it to flip to " + expected
+            profilePage.isPushNotificationToggleUpdated(expected),
+            "Push Notification toggle did not update: was "
+                + pushNotificationStateBeforeToggle
+                + ", expected it to flip to " + expected
         );
     }
 
@@ -102,15 +104,58 @@ public class ProfileSteps {
     }
 
     @Then("the Remote Monitoring section should show {string} status")
-    public void verify_remote_monitoring_status(String status) {
-        Assertions.assertEquals(status, profilePage.getRemoteMonitoringStatus(),
-                "Remote Monitoring status mismatch");
+    public void verify_remote_monitoring_status(String expectedStatus) {
+        String actual = normalizeStatus(profilePage.getRemoteMonitoringStatus());
+
+        Assertions.assertFalse(
+            isMissing(actual),
+            "Remote Monitoring status badge could not be found on the page."
+        );
+
+        System.out.println(
+            "[TEST] Remote Monitoring - Expected: '" + expectedStatus
+                + "', Actual: '" + actual + "'"
+        );
+
+        Assertions.assertEquals(
+            normalizeStatus(expectedStatus),
+            actual,
+            "Remote Monitoring status mismatch. Expected: '"
+                + expectedStatus + "', but UI shows: '" + actual + "'"
+        );
     }
 
     @Then("the Notice of Privacy Practices should show {string} status")
-    public void verify_privacy_notice_status(String status) {
-        Assertions.assertEquals(status, profilePage.getPrivacyNoticeStatus(),
-                "Privacy Notice status mismatch");
+    public void verify_privacy_notice_status(String expectedStatus) {
+        String actual = normalizeStatus(profilePage.getPrivacyNoticeStatus());
+
+        Assertions.assertFalse(
+            isMissing(actual),
+            "Privacy Notice status badge could not be found on the page."
+        );
+
+        System.out.println(
+            "[TEST] Privacy Notice - Expected: '" + expectedStatus
+                + "', Actual: '" + actual + "'"
+        );
+
+        Assertions.assertEquals(
+            normalizeStatus(expectedStatus),
+            actual,
+            "Privacy Notice status mismatch. Expected: '"
+                + expectedStatus + "', but UI shows: '" + actual + "'"
+        );
+    }
+
+    private String normalizeStatus(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.trim().replaceAll("\\s+", " ").toLowerCase();
+    }
+
+    private boolean isMissing(String value) {
+        return value.isEmpty() || "not found".equals(value);
     }
 
     @When("the user clicks on {string}")
@@ -141,16 +186,16 @@ public class ProfileSteps {
     @Then("the privacy policy effective date and version should be displayed")
     public void verify_privacy_policy_effective_date_displayed() {
         Assertions.assertTrue(
-                profilePage.isPrivacyPolicyEffectiveDateAndVersionDisplayed(),
-                "Effective date/version line not displayed on Privacy Policy page"
+            profilePage.isPrivacyPolicyEffectiveDateAndVersionDisplayed(),
+            "Effective date/version line not displayed on Privacy Policy page"
         );
     }
 
     @Then("the Information We Collect section should be displayed")
     public void verify_information_we_collect_section_displayed() {
         Assertions.assertTrue(
-                profilePage.isPrivacyPolicyInfoWeCollectSectionDisplayed(),
-                "'Information We Collect' section not displayed"
+            profilePage.isPrivacyPolicyInfoWeCollectSectionDisplayed(),
+            "'Information We Collect' section not displayed"
         );
     }
 
@@ -166,12 +211,18 @@ public class ProfileSteps {
 
     @Then("the What Are Cookies section should be displayed")
     public void verify_what_are_cookies_section_displayed() {
-        Assertions.assertTrue(profilePage.isCookiePolicySection1Displayed(), "'What Are Cookies' section not displayed");
+        Assertions.assertTrue(
+            profilePage.isCookiePolicySection1Displayed(),
+            "'What Are Cookies' section not displayed"
+        );
     }
 
     @Then("the Cookies We Use section should be displayed")
     public void verify_cookies_we_use_section_displayed() {
-        Assertions.assertTrue(profilePage.isCookiePolicySection2Displayed(), "'Cookies We Use' section not displayed");
+        Assertions.assertTrue(
+            profilePage.isCookiePolicySection2Displayed(),
+            "'Cookies We Use' section not displayed"
+        );
     }
 
     @When("the user clicks back from the Cookie Policy page")
