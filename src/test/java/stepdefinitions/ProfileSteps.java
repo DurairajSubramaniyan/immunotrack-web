@@ -127,7 +127,8 @@ public class ProfileSteps {
 
     @Then("the Notice of Privacy Practices should show {string} status")
     public void verify_privacy_notice_status(String expectedStatus) {
-        String actual = normalizeStatus(profilePage.getPrivacyNoticeStatus());
+        // ✅ FIX: expectedStatus argument pass பண்றோம்
+        String actual = normalizeStatus(profilePage.getPrivacyNoticeStatus(expectedStatus));
 
         Assertions.assertFalse(
             isMissing(actual),
