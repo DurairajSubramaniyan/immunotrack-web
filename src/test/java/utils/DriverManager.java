@@ -12,6 +12,13 @@ import java.time.Duration;
 public class DriverManager {
     private static final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
 
+    // Fallback implicit wait (seconds) used when "timeout" is missing, blank,
+    // non-numeric, or 0 in config.properties. 0 means Selenium will not wait
+    // at all for elements to appear, which causes NoSuchElementException on
+    // any element that takes even a moment to render (very common in React
+    // SPAs). 10 seconds is a safe, commonly used default.
+    private static final int DEFAULT_IMPLICIT_WAIT_SECONDS = 10;
+
     private DriverManager() {
         // Prevent instantiation
     }
@@ -78,11 +85,45 @@ public class DriverManager {
             }
 
             driver.manage().window().maximize();
-            int timeout = Integer.parseInt(ConfigReader.getProperty("timeout"));
+
+            int timeout = resolveImplicitWaitSeconds();
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(timeout));
+
             driverThreadLocal.set(driver);
         }
         return driverThreadLocal.get();
+    }
+
+    /**
+     * Reads the "timeout" property from config.properties and safely converts
+     * it to a positive number of seconds to use as the implicit wait.
+     * Falls back to DEFAULT_IMPLICIT_WAIT_SECONDS if the property is missing,
+     * blank, not a valid number, or <= 0 (an implicit wait of 0 effectively
+     * disables waiting and causes NoSuchElementException on elements that
+     * take any time to render).
+     */
+    private static int resolveImplicitWaitSeconds() {
+        String timeoutProp = ConfigReader.getProperty("timeout");
+        if (timeoutProp == null || timeoutProp.trim().isEmpty()) {
+            System.out.println("[DriverManager] 'timeout' property not set in config.properties. "
+                    + "Using default implicit wait: " + DEFAULT_IMPLICIT_WAIT_SECONDS + "s");
+            return DEFAULT_IMPLICIT_WAIT_SECONDS;
+        }
+        try {
+            int parsed = Integer.parseInt(timeoutProp.trim());
+            if (parsed <= 0) {
+                System.out.println("[DriverManager] 'timeout' property is " + parsed
+                        + " in config.properties, which disables implicit waiting. "
+                        + "Using default implicit wait: " + DEFAULT_IMPLICIT_WAIT_SECONDS + "s");
+                return DEFAULT_IMPLICIT_WAIT_SECONDS;
+            }
+            return parsed;
+        } catch (NumberFormatException e) {
+            System.out.println("[DriverManager] 'timeout' property ('" + timeoutProp
+                    + "') in config.properties is not a valid number. "
+                    + "Using default implicit wait: " + DEFAULT_IMPLICIT_WAIT_SECONDS + "s");
+            return DEFAULT_IMPLICIT_WAIT_SECONDS;
+        }
     }
 
     public static void quitDriver() {
