@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>ImmunoTrack Automation Test Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary-blue: #2563eb;
+      --primary-blue-hover: #1d4ed8;
+      --header-bg: #0d172a;
+      --color-pass: #22c55e;
+      --color-pass-bg: #f0fdf4;
+      --color-pass-text: #166534;
+      --color-fail: #ef4444;
+      --color-fail-bg: #fef2f2;
+      --color-fail-text: #991b1b;
+      --color-skip: #eab308;
+      --color-skip-bg: #fefce8;
+      --color-skip-text: #854d0e;
+      --color-purple: #a855f7;
+      --color-purple-bg: #faf5ff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ---------------- TOP HEADER BAR ---------------- */
+    .top-header {
+      background-color: var(--header-bg);
+      color: #ffffff;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      border-bottom: 1px solid #1e293b;
+      flex-shrink: 0;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon-shield {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+    }
+
+    .brand-title-group h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .brand-title-group p {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .header-meta-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .meta-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background-color: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+    }
+
+    .meta-badge svg {
+      width: 15px;
+      height: 15px;
+      color: #38bdf8;
+    }
+
+    .meta-badge strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .build-status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #dcfce7;
+      color: #166534;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 7px 18px;
+      border-radius: 20px;
+      border: 1px solid #bbf7d0;
+      letter-spacing: 0.02em;
+    }
+
+    .build-status-badge.failed {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    /* ---------------- MAIN WORKSPACE ---------------- */
+    .main-workspace {
+      flex: 1;
+      max-width: 1560px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 32px 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* ---------------- METRIC STATS ---------------- */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1100px) {
+      .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .metric-card {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+    }
+
+    .metric-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .metric-icon-box.blue { background-color: #eff6ff; color: #3b82f6; }
+    .metric-icon-box.green { background-color: var(--color-pass-bg); color: var(--color-pass); }
+    .metric-icon-box.red { background-color: var(--color-fail-bg); color: var(--color-fail); }
+    .metric-icon-box.yellow { background-color: var(--color-skip-bg); color: var(--color-skip); }
+    .metric-icon-box.purple { background-color: var(--color-purple-bg); color: var(--color-purple); }
+
+    .metric-icon-box svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .metric-data {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .metric-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .metric-val {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    .metric-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 12px;
+    }
+
+    .metric-pill.green { background-color: #dcfce7; color: #166534; }
+    .metric-pill.red { background-color: #fee2e2; color: #991b1b; }
+    .metric-pill.yellow { background-color: #fef9c3; color: #854d0e; }
+
+    /* ---------------- CHARTS ROW (2-PANEL LAYOUT) ---------------- */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 950px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dashboard-panel {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .panel-action {
+      font-size: 0.8rem;
+      color: var(--primary-blue);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Execution Summary Donut */
+    .donut-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex: 1;
+      gap: 24px;
+      padding: 10px 0;
+    }
+
+    .donut-svg-wrap {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donut-center-info {
+      position: absolute;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+    }
+
+    .donut-center-info .count {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .donut-center-info .sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.green { background-color: var(--color-pass); }
+    .legend-dot.red { background-color: var(--color-fail); }
+    .legend-dot.yellow { background-color: var(--color-skip); }
+
+    .legend-val {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .legend-pct {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    /* Feature Results Progress List */
+    .feature-progress-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+      max-height: 200px;
+      padding-right: 4px;
+    }
+
+    .feature-progress-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      background-color: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #f1f5f9;
+      transition: background-color 0.15s ease;
+    }
+
+    .feature-progress-item:hover {
+      background-color: #f1f5f9;
+    }
+
+    .feature-name-label {
+      width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 9px;
+      background-color: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .bar-seg.pass { background-color: var(--color-pass); }
+    .bar-seg.fail { background-color: var(--color-fail); }
+
+    .feature-score {
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .feature-duration-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #64748b;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* ---------------- FILTER & SEARCH CONTROLS ---------------- */
+    .action-controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pills-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #e2e8f0;
+      padding: 4px;
+      border-radius: 30px;
+    }
+
+    .filter-btn {
+      border: none;
+      background: transparent;
+      padding: 7px 16px;
+      border-radius: 25px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-btn:hover {
+      color: var(--text-main);
+    }
+
+    .filter-btn.active {
+      background-color: var(--primary-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    .search-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 14px;
+      width: 320px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .search-box svg {
+      width: 17px;
+      height: 17px;
+      color: var(--text-muted);
+    }
+
+    .search-input {
+      border: none;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      width: 100%;
+      color: var(--text-main);
+    }
+
+    .select-dropdown {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ---------------- FEATURES & SCENARIOS GRID ---------------- */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .catalog-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left: Feature Selector Card */
+    .features-list-card {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .features-card-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .features-card-header h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .count-pill {
+      background-color: #f1f5f9;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+
+    .features-scroll-items {
+      display: flex;
+      flex-direction: column;
+      max-height: 580px;
+      overflow-y: auto;
+    }
+
+    .feature-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .feature-item-row:hover {
+      background-color: #f8fafc;
+    }
+
+    .feature-item-row.selected {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--primary-blue);
+    }
+
+    .feature-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-item-left svg {
+      width: 17px;
+      height: 17px;
+      color: var(--text-muted);
+    }
+
+    .feature-item-row.selected .feature-item-left svg {
+      color: var(--primary-blue);
+    }
+
+    .feature-item-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .feature-item-row.selected .feature-item-title {
+      color: var(--primary-blue);
+    }
+
+    .feature-item-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-count-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 12px;
+    }
+
+    .status-count-badge.passed {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .status-count-badge.failed {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Right: Scenario Table Card */
+    .scenario-table-card {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scenario-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .scenario-header-left h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .scenario-header-sub {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .tag-badge {
+      background-color: #eff6ff;
+      color: var(--primary-blue);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #dbeafe;
+    }
+
+    .feature-status-banner-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #dcfce7;
+      color: #166534;
+      font-size: 0.84rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #bbf7d0;
+    }
+
+    .feature-status-banner-pill.has-failure {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .scenarios-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .scenarios-table th {
+      padding: 12px 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      background-color: #f8fafc;
+    }
+
+    .scenarios-table td {
+      padding: 14px 20px;
+      font-size: 0.86rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .scenarios-table tbody tr {
+      cursor: pointer;
+      transition: background-color 0.12s ease;
+    }
+
+    .scenarios-table tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .col-idx {
+      width: 44px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .col-name {
+      font-weight: 600;
+    }
+
+    .scenario-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 14px;
+    }
+
+    .scenario-status-pill.passed {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .scenario-status-pill.failed {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .scenario-status-pill.skipped {
+      background-color: #fef9c3;
+      color: #854d0e;
+    }
+
+    .col-duration {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .action-icons-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-icon-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .action-icon-btn:hover {
+      color: var(--primary-blue);
+      background-color: #eff6ff;
+    }
+
+    .action-icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ---------------- STEP DETAILS DRAWER / MODAL ---------------- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 24px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background-color: #ffffff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 820px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      animation: modalSlideUp 0.2s ease-out;
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f8fafc;
+    }
+
+    .modal-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .step-item-card {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .step-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .step-name {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-log-output {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 10px 14px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      border-left: 3px solid #38bdf8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="top-header">
+    <div class="brand-section">
+      <div class="brand-icon-shield">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <polyline points="9 12 11 14 15 10"></polyline>
+        </svg>
+      </div>
+      <div class="brand-title-group">
+        <h1>ImmunoTrack</h1>
+        <p>Automation Test Execution Dashboard</p>
+      </div>
+    </div>
+
+    <div class="header-meta-group">
+      <div class="meta-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span>Thu, Sep 24, 2026, 03:54 PM</span>
+      </div>
+
+      <div class="meta-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span>Execution Time: <strong>5m 31s</strong></span>
+      </div>
+
+      <div class="meta-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>Environment: <strong>QA</strong></span>
+      </div>
+
+      <div class="meta-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <span>Browser: <strong>Chrome 153</strong></span>
+      </div>
+
+      <div class="build-status-badge ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px;">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Build #1026 SUCCESS</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="main-workspace">
+
+    <!-- TOP METRIC CARDS -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon-box blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Total Features</span>
+          <div class="metric-value-row">
+            <span class="metric-val">1</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Passed</span>
+          <div class="metric-value-row">
+            <span class="metric-val">9</span>
+            <span class="metric-pill green">100.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Failed</span>
+          <div class="metric-value-row">
+            <span class="metric-val">0</span>
+            <span class="metric-pill red">0.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Skipped</span>
+          <div class="metric-value-row">
+            <span class="metric-val">0</span>
+            <span class="metric-pill yellow">0.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Total Scenarios</span>
+          <div class="metric-value-row">
+            <span class="metric-val">9</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHARTS ROW (2-PANEL LAYOUT: Execution Summary + Feature Results) -->
+    <section class="charts-grid">
+      <!-- 1. Execution Summary Donut -->
+      <div class="dashboard-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Execution Summary</h3>
+        </div>
+        <div class="donut-container">
+          <div class="donut-svg-wrap">
+            <svg width="150" height="150" viewBox="0 0 140 140">
+              <!-- Background Circle -->
+              <circle cx="70" cy="70" r="54" fill="transparent" stroke="#f1f5f9" stroke-width="16" />
+              <!-- Passed Arc -->
+              <circle cx="70" cy="70" r="54" fill="transparent" stroke="var(--color-pass)" stroke-width="16"
+                stroke-dasharray="339.29 339.29"
+                stroke-dashoffset="84.82" stroke-linecap="round" />
+              
+            </svg>
+            <div class="donut-center-info">
+              <span class="count">9</span>
+              <span class="sub">Scenarios</span>
+            </div>
+          </div>
+
+          <div class="donut-legend">
+            <div class="legend-item">
+              <span class="legend-dot green"></span>
+              <span>Passed</span>
+              <span class="legend-val">9</span>
+              <span class="legend-pct">(100.0%)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot red"></span>
+              <span>Failed</span>
+              <span class="legend-val">0</span>
+              <span class="legend-pct">(0.0%)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot yellow"></span>
+              <span>Skipped</span>
+              <span class="legend-val">0</span>
+              <span class="legend-pct">(0.0%)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Feature Results Progress List -->
+      <div class="dashboard-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Feature Results</h3>
+          <span class="panel-action" onclick="resetAllFilters()">View All</span>
+        </div>
+        <div class="feature-progress-list">
+          
+              <div class="feature-progress-item" onclick="selectFeatureByName('SmokeSuite.feature')" style="cursor: pointer;">
+                <span class="feature-name-label" title="SmokeSuite.feature">SmokeSuite.feature</span>
+                <div class="bar-track">
+                  <div class="bar-seg pass" style="width: 100%;"></div>
+                  
+                </div>
+                <span class="feature-duration-badge">5m 31s</span>
+                <span class="feature-score">9/9</span>
+              </div>
+            
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTION CONTROLS / FILTERS -->
+    <section class="action-controls-row">
+      <div class="filter-pills-group">
+        <button class="filter-btn active" id="btnFilterAll" onclick="filterByStatus('all')">
+          All (9)
+        </button>
+        <button class="filter-btn" id="btnFilterPassed" onclick="filterByStatus('passed')">
+          Passed (9)
+        </button>
+        <button class="filter-btn" id="btnFilterFailed" onclick="filterByStatus('failed')">
+          Failed (0)
+        </button>
+        <button class="filter-btn" id="btnFilterSkipped" onclick="filterByStatus('skipped')">
+          Skipped (0)
+        </button>
+      </div>
+
+      <div class="search-filter-group">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by scenario or step..." oninput="handleSearch(this.value)">
+        </div>
+
+        <select class="select-dropdown" id="featureSelectDropdown" onchange="handleFeatureDropdown(this.value)">
+          <option value="ALL">All Features (1)</option>
+          <option value="SmokeSuite.feature">SmokeSuite.feature</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- CATALOG GRID (FEATURES LIST + SCENARIO TABLE) -->
+    <section class="catalog-grid">
+      <!-- LEFT: Features List Card -->
+      <div class="features-list-card">
+        <div class="features-card-header">
+          <h3>Features</h3>
+          <span class="count-pill">1</span>
+        </div>
+        <div class="features-scroll-items" id="featuresListContainer">
+          
+            <div class="feature-item-row selected" id="featureRow_0" onclick="selectFeature(0)">
+              <div class="feature-item-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <span class="feature-item-title">SmokeSuite.feature</span>
+              </div>
+              <div class="feature-item-right">
+                <span class="status-count-badge passed">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 11px; height: 11px;">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  9/9
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; color: #cbd5e1;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </div>
+            </div>
+          
+        </div>
+      </div>
+
+      <!-- RIGHT: Selected Feature Detail Card -->
+      <div class="scenario-table-card">
+        <div class="scenario-card-header">
+          <div class="scenario-header-left">
+            <h2 id="currentFeatureTitle">SmokeSuite.feature</h2>
+            <div class="scenario-header-sub">
+              <span id="currentFeatureDesc">Feature: ImmunoTrack Full Application Comprehensive Smoke Suite</span>
+              <span class="tag-badge" id="currentFeatureTag">@smoke</span>
+            </div>
+          </div>
+          <div class="feature-status-banner-pill " id="currentFeatureBanner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px;">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="currentFeatureRatio">9 / 9 Passed</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="scenarios-table">
+            <thead>
+              <tr>
+                <th class="col-idx">#</th>
+                <th class="col-name">Scenario</th>
+                <th class="col-status">Status</th>
+                <th class="col-duration">Duration</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="scenariosTableBody">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- STEP DETAILS MODAL / DRAWER -->
+  <div class="modal-overlay" id="scenarioModalOverlay" onclick="closeModal(event)">
+    <div class="modal-dialog" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modalScenarioTitle">Scenario Details</h3>
+        <button class="modal-close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalStepsList">
+        <!-- Steps rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT JAVASCRIPT ================= -->
+  <script>
+    const featuresData = [{"name":"SmokeSuite.feature","title":"ImmunoTrack Full Application Comprehensive Smoke Suite","tag":"@smoke","totalTimeSec":331.434,"scenarios":[{"name":"Smoke check - Dashboard page header, greeting, status cards, action buttons, and footer","status":"passed","duration":"38.8s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"7.8s","log":null},{"name":"Then the patient should see the dashboard greeting header and portal title","status":"passed","duration":"7.8s","log":">>> [DASHBOARD] Actual Greeting/Header: \"Good afternoon, pavithra!\" | Portal: \"Patient Portal\""},{"name":"And the patient should see the monitoring status and flare risk cards with values","status":"passed","duration":"7.8s","log":null},{"name":"And the patient should see the dashboard action buttons to log symptoms or start assessment","status":"passed","duration":"7.8s","log":null},{"name":"And the page footer or bottom branding should be visible","status":"passed","duration":"7.8s","log":null}]},{"name":"Smoke check - Log Symptoms page title, symptom assessment domains, and save button","status":"passed","duration":"35.2s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"5.9s","log":null},{"name":"When the patient navigates to the Log Symptoms module","status":"passed","duration":"5.9s","log":null},{"name":"Then the Log Symptoms page title and header should be visible","status":"passed","duration":"5.9s","log":">>> [LOG SYMPTOMS] Actual Title/Header: \"Daily Health Log\""},{"name":"And the clinical symptom assessment domains should be displayed","status":"passed","duration":"5.9s","log":null},{"name":"And the save daily log action button should be visible","status":"passed","duration":"5.9s","log":null},{"name":"And the page footer or bottom branding should be visible","status":"passed","duration":"5.9s","log":null}]},{"name":"Smoke check - Medications page title, Quick Add medication form, and Add to Plan button","status":"passed","duration":"36.4s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"5.2s","log":null},{"name":"When the patient navigates to the Medications module","status":"passed","duration":"5.2s","log":null},{"name":"Then the Medications page title and header should be visible","status":"passed","duration":"5.2s","log":">>> [MEDICATIONS] Actual Title/Header: \"Medications\""},{"name":"And the Quick Add medication section and form fields should be displayed","status":"passed","duration":"5.2s","log":null},{"name":"And the Add to Plan action button should be visible","status":"passed","duration":"5.2s","log":null},{"name":"And the active medications tracking section should be displayed","status":"passed","duration":"5.2s","log":null},{"name":"And the page footer or bottom branding should be visible","status":"passed","duration":"5.2s","log":null}]},{"name":"Smoke check - History page title, date filter buttons, and symptom entries","status":"passed","duration":"34.8s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"7.0s","log":null},{"name":"When the patient navigates to the History module","status":"passed","duration":"7.0s","log":null},{"name":"Then the Symptom History page title and header should be visible","status":"passed","duration":"7.0s","log":">>> [HISTORY] Actual Title/Header: \"Symptom History\""},{"name":"And the date filter section with quick range buttons should be displayed","status":"passed","duration":"7.0s","log":null},{"name":"And the page footer or bottom branding should be visible","status":"passed","duration":"7.0s","log":null}]},{"name":"Smoke check - Insights page title, health analytics, and risk factors widgets","status":"passed","duration":"36.7s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"7.3s","log":null},{"name":"When the patient navigates to the Insights module","status":"passed","duration":"7.3s","log":null},{"name":"Then the Health Insights page title and header should be visible","status":"passed","duration":"7.3s","log":">>> [INSIGHTS] Actual Title/Header: \"Health Insights\""},{"name":"And the predictive insights and analytics widgets should be displayed","status":"passed","duration":"7.3s","log":null},{"name":"And the page footer or bottom branding should be visible","status":"passed","duration":"7.3s","log":null}]},{"name":"Smoke check - Lab Results page title, biomarker readings, and result cards","status":"passed","duration":"36.2s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"7.2s","log":null},{"name":"When the patient navigates to the Lab Results module","status":"passed","duration":"7.2s","log":null},{"name":"Then the Lab Results page title and header should be visible","status":"passed","duration":"7.2s","log":">>> [LAB RESULTS] Actual Title/Header: \"Lab Results\""},{"name":"And the laboratory biomarker cards and readings should be displayed","status":"passed","duration":"7.2s","log":null},{"name":"And the page footer or bottom branding should be visible","status":"passed","duration":"7.2s","log":null}]},{"name":"Smoke check - Profile page title, patient summary, contact information, and save button","status":"passed","duration":"34.3s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"4.9s","log":null},{"name":"When the patient navigates to the Profile module","status":"passed","duration":"4.9s","log":null},{"name":"Then the Profile page title and header should be visible","status":"passed","duration":"4.9s","log":">>> [PROFILE] Actual Title/Header: \"My Profile\""},{"name":"And the patient account summary with condition and age should be displayed","status":"passed","duration":"4.9s","log":null},{"name":"And the contact information section with email and phone should be displayed","status":"passed","duration":"4.9s","log":null},{"name":"And the Save Profile Changes action button should be visible","status":"passed","duration":"4.9s","log":null},{"name":"And the page footer or bottom branding should be visible","status":"passed","duration":"4.9s","log":null}]},{"name":"Smoke check - End-to-end full application navigation tour across all modules","status":"passed","duration":"40.4s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"2.5s","log":null},{"name":"Then the patient should be on the healthy Dashboard module","status":"passed","duration":"2.5s","log":null},{"name":"When the patient navigates to the Log Symptoms module","status":"passed","duration":"2.5s","log":null},{"name":"Then the Log Symptoms module should load successfully","status":"passed","duration":"2.5s","log":null},{"name":"When the patient navigates to the Medications module","status":"passed","duration":"2.5s","log":null},{"name":"Then the Medications module should load successfully","status":"passed","duration":"2.5s","log":null},{"name":"When the patient navigates to the History module","status":"passed","duration":"2.5s","log":null},{"name":"Then the History module should load successfully","status":"passed","duration":"2.5s","log":null},{"name":"When the patient navigates to the Insights module","status":"passed","duration":"2.5s","log":null},{"name":"Then the Insights module should load successfully","status":"passed","duration":"2.5s","log":null},{"name":"When the patient navigates to the Lab Results module","status":"passed","duration":"2.5s","log":null},{"name":"Then the Lab Results module should load successfully","status":"passed","duration":"2.5s","log":null},{"name":"When the patient navigates to the Profile module","status":"passed","duration":"2.5s","log":null},{"name":"Then the Profile module should load successfully","status":"passed","duration":"2.5s","log":null},{"name":"When the patient navigates back to the Dashboard module","status":"passed","duration":"2.5s","log":null},{"name":"Then the patient should be on the healthy Dashboard module","status":"passed","duration":"2.5s","log":null}]},{"name":"Smoke check - Verify patient can securely log out","status":"passed","duration":"36.2s","steps":[{"name":"Given the patient logs in with valid credentials","status":"passed","duration":"9.0s","log":null},{"name":"Then the patient should be on the healthy Dashboard module","status":"passed","duration":"9.0s","log":null},{"name":"When the patient clicks the logout button","status":"passed","duration":"9.0s","log":null},{"name":"Then the patient should be redirected to the Login page","status":"passed","duration":"9.0s","log":null}]}],"passedCount":9,"failedCount":0,"skippedCount":0}];
+    let selectedFeatureIndex = 0;
+    let currentStatusFilter = 'all';
+    let searchQuery = '';
+
+    function init() {
+      renderScenariosTable();
+    }
+
+    function selectFeature(idx) {
+      selectedFeatureIndex = idx;
+      document.querySelectorAll('.feature-item-row').forEach((row, i) => {
+        row.classList.toggle('selected', i === idx);
+      });
+      const feature = featuresData[idx];
+      document.getElementById('currentFeatureTitle').innerText = feature.name;
+      document.getElementById('currentFeatureDesc').innerText = 'Feature: ' + feature.title;
+      document.getElementById('currentFeatureTag').innerText = feature.tag;
+      
+      const banner = document.getElementById('currentFeatureBanner');
+      banner.className = 'feature-status-banner-pill ' + (feature.failedCount > 0 ? 'has-failure' : '');
+      document.getElementById('currentFeatureRatio').innerText = feature.passedCount + ' / ' + feature.scenarios.length + ' Passed';
+      
+      renderScenariosTable();
+    }
+
+    function selectFeatureByName(name) {
+      const idx = featuresData.findIndex(f => f.name === name);
+      if (idx !== -1) {
+        selectFeature(idx);
+        document.getElementById('featureSelectDropdown').value = name;
+      }
+    }
+
+    function renderScenariosTable() {
+      const feature = featuresData[selectedFeatureIndex];
+      const tbody = document.getElementById('scenariosTableBody');
+      tbody.innerHTML = '';
+
+      let filteredScenarios = feature.scenarios.filter(sc => {
+        if (currentStatusFilter !== 'all' && sc.status !== currentStatusFilter) return false;
+        if (searchQuery && !sc.name.toLowerCase().includes(searchQuery) && !feature.name.toLowerCase().includes(searchQuery)) return false;
+        return true;
+      });
+
+      if (filteredScenarios.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">No matching scenarios found for this filter.</td></tr>';
+        return;
+      }
+
+      filteredScenarios.forEach((sc, i) => {
+        const tr = document.createElement('tr');
+        tr.onclick = () => openScenarioModal(selectedFeatureIndex, i);
+        tr.innerHTML = `
+          <td class="col-idx">${i + 1}</td>
+          <td class="col-name">${sc.name}</td>
+          <td class="col-status">
+            <span class="scenario-status-pill ${sc.status}">
+              ${sc.status === 'passed' ? '✔' : sc.status === 'failed' ? '✖' : '—'} ${sc.status.charAt(0).toUpperCase() + sc.status.slice(1)}
+            </span>
+          </td>
+          <td class="col-duration">${sc.duration}</td>
+          <td class="col-actions">
+            <div class="action-icons-wrap">
+              <button class="action-icon-btn" title="View Details" onclick="event.stopPropagation(); openScenarioModal(${selectedFeatureIndex}, ${i})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+              <button class="action-icon-btn" title="Screenshots" onclick="event.stopPropagation(); openScenarioModal(${selectedFeatureIndex}, ${i})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              </button>
+              <button class="action-icon-btn" title="Step Logs" onclick="event.stopPropagation(); openScenarioModal(${selectedFeatureIndex}, ${i})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterByStatus(status) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      if (status === 'all') document.getElementById('btnFilterAll').classList.add('active');
+      else if (status === 'passed') document.getElementById('btnFilterPassed').classList.add('active');
+      else if (status === 'failed') document.getElementById('btnFilterFailed').classList.add('active');
+      else if (status === 'skipped') document.getElementById('btnFilterSkipped').classList.add('active');
+      renderScenariosTable();
+    }
+
+    function resetAllFilters() {
+      filterByStatus('all');
+      document.getElementById('searchInput').value = '';
+      searchQuery = '';
+      document.getElementById('featureSelectDropdown').value = 'ALL';
+      renderScenariosTable();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderScenariosTable();
+    }
+
+    function handleFeatureDropdown(val) {
+      if (val === 'ALL') {
+        selectFeature(0);
+      } else {
+        selectFeatureByName(val);
+      }
+    }
+
+    function openScenarioModal(featureIdx, scenarioIdx) {
+      const scenario = featuresData[featureIdx].scenarios[scenarioIdx];
+      document.getElementById('modalScenarioTitle').innerText = scenario.name;
+      const list = document.getElementById('modalStepsList');
+      list.innerHTML = '';
+
+      scenario.steps.forEach(st => {
+        const stepCard = document.createElement('div');
+        stepCard.className = 'step-item-card';
+        stepCard.innerHTML = `
+          <div class="step-header-row">
+            <span class="step-name">
+              <span style="color: ${st.status === 'passed' ? 'var(--color-pass)' : 'var(--color-fail)'}">●</span>
+              ${st.name}
+            </span>
+            <span style="font-family: monospace; font-size: 0.78rem; color: #64748b;">${st.duration}</span>
+          </div>
+          ${st.log ? `<div class="step-log-output">${st.log}</div>` : ''}
+        `;
+        list.appendChild(stepCard);
+      });
+
+      document.getElementById('scenarioModalOverlay').classList.add('open');
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== document.getElementById('scenarioModalOverlay') && !e.target.classList.contains('modal-close-btn')) {
+        return;
+      }
+      document.getElementById('scenarioModalOverlay').classList.remove('open');
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
