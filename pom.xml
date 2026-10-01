@@ -75,6 +75,13 @@
             <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Google Authenticator TOTP generation for 2FA / MFA -->
+        <dependency>
+            <groupId>org.jboss.aerogear</groupId>
+            <artifactId>aerogear-otp-java</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -90,19 +97,49 @@
                 </configuration>
             </plugin>
 
-            <!-- Surefire Plugin to run tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.3.1</version>
                 <configuration>
+                    <!-- Continue to the verify phase even when tests fail so
+                         the HTML report is always generated. -->
+                    <testFailureIgnore>true</testFailureIgnore>
                     <properties>
                         <configurationParameters>
                             cucumber.plugin = pretty, html:target/cucumber-reports/cucumber.html, json:target/cucumber-reports/cucumber.json
-                            cucumber.publish.quiet = true
+                            cucumber.publish.enabled = true
+                            cucumber.publish.quiet = false
                         </configurationParameters>
                     </properties>
                 </configuration>
+            </plugin>
+
+            <!-- Masterthought Cucumber Reporting: generates a rich HTML
+                 report from the cucumber.json file after tests run.
+                 Open: target/cucumber-reports/cucumber-html-reports/overview-features.html -->
+            <plugin>
+                <groupId>net.masterthought</groupId>
+                <artifactId>maven-cucumber-reporting</artifactId>
+                <version>5.8.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-cucumber-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <projectName>ImmunoTrack Web Automation</projectName>
+                            <outputDirectory>${project.build.directory}/cucumber-reports</outputDirectory>
+                            <jsonFiles>
+                                <param>${project.build.directory}/cucumber-reports/cucumber.json</param>
+                            </jsonFiles>
+                            <buildNumber>1</buildNumber>
+                            <checkBuildResult>false</checkBuildResult>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

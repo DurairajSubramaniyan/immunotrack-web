@@ -9,10 +9,9 @@ import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("features")
+@SelectClasspathResource("features/clinician")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "stepdefinitions")
-@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, summary, html:target/cucumber-reports/cucumber.html, json:target/cucumber-reports/cucumber.json")
-@ConfigurationParameter(key = "cucumber.publish.enabled", value = "true")
-@ConfigurationParameter(key = "cucumber.publish.quiet", value = "false")
-public class TestRunner {
+@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, summary, html:target/cucumber-reports/clinician-report.html, json:target/cucumber-reports/clinician-report.json")
+@ConfigurationParameter(key = "cucumber.publish.enabled", value = "false")
+public class ClinicianTestRunner {
 }

@@ -39,9 +39,13 @@ public class DashboardSteps {
                 loginPage.enterEmail(email != null ? email : "patient002@test.com");
                 loginPage.enterPassword(password != null ? password : "Testing@123");
                 loginPage.clickLogin();
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ignored) {}
+                long start = System.currentTimeMillis();
+                while (System.currentTimeMillis() - start < 8000) {
+                    if (driver.getCurrentUrl() != null && driver.getCurrentUrl().contains("dashboard")) {
+                        break;
+                    }
+                    try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+                }
             }
         }
         utils.MonthlyAssessmentHandler.handleMonthlyAssessmentIfPresent(driver);
@@ -156,5 +160,47 @@ public class DashboardSteps {
         System.out.println("[INFO] Refreshing dashboard page to fetch updated scores from backend...");
         driver.navigate().refresh();
         try { Thread.sleep(3000); } catch (Exception ignored) {}
+    }
+
+    @Then("the user should see the patient portal greeting header and monitoring subtitle")
+    public void theUserShouldSeeThePatientPortalGreetingHeaderAndMonitoringSubtitle() {
+        Assertions.assertTrue(dashboardPage.verifyGreetingAndHeaderSubtitle(),
+                "Assertion Failed: Greeting header or subtitle is missing or invalid on Dashboard.");
+    }
+
+    @Then("the monitoring status badge should match the condition for Goal Reached, At Risk, Behind, or On Track")
+    public void theMonitoringStatusBadgeShouldMatchTheConditionForGoalReachedAtRiskBehindOrOnTrack() {
+        Assertions.assertTrue(dashboardPage.verifyMonitoringStatusBadgeLogic(),
+                "Assertion Failed: Monitoring status badge does not match expected condition (loggedDays vs daysRemaining logic).");
+    }
+
+    @Then("the user can toggle the monitoring card details visibility")
+    public void theUserCanToggleTheMonitoringCardDetailsVisibility() {
+        Assertions.assertTrue(dashboardPage.toggleMonitoringCardDetails(),
+                "Assertion Failed: Toggle button for Show Details / Show Less failed.");
+    }
+
+    @Then("the symptom section clinical titles should match the score threshold rules")
+    public void theSymptomSectionClinicalTitlesShouldMatchTheScoreThresholdRules() {
+        Assertions.assertTrue(dashboardPage.verifySymptomClinicalLabelsRule(),
+                "Assertion Failed: Symptom clinical title badge (Well-controlled/Partially controlled/Poorly controlled) does not match score rules.");
+    }
+
+    @Then("the severity classification should match the overall risk level thresholds")
+    public void theSeverityClassificationShouldMatchTheOverallRiskLevelThresholds() {
+        Assertions.assertTrue(dashboardPage.verifyOverallRiskSeverityRule(),
+                "Assertion Failed: Overall risk severity level (Low <4, Moderate <7, High >=7) does not match risk score.");
+    }
+
+    @Then("the Insights widget should display flare prediction or data logging guidance")
+    public void theInsightsWidgetShouldDisplayFlarePredictionOrDataLoggingGuidance() {
+        Assertions.assertTrue(dashboardPage.verifyInsightsWidgetContent(),
+                "Assertion Failed: Insights widget content is missing or failed assertion.");
+    }
+
+    @Then("the Medications widget should display tracked medications or fallback text")
+    public void theMedicationsWidgetShouldDisplayTrackedMedicationsOrFallbackText() {
+        Assertions.assertTrue(dashboardPage.verifyMedicationsWidgetContent(),
+                "Assertion Failed: Medications widget content is missing or failed assertion.");
     }
 }

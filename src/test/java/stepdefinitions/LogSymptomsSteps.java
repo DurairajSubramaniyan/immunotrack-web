@@ -12,11 +12,21 @@ import utils.DriverManager;
 public class LogSymptomsSteps {
     private final LogSymptomsPage logSymptomsPage = new LogSymptomsPage();
     private final DashboardPage dashboardPage = new DashboardPage();
-    private final WebDriver driver = DriverManager.getDriver();
+
+    private String getCurrentUrlSafely() {
+        try {
+            WebDriver d = DriverManager.getDriver();
+            if (d != null) {
+                String url = d.getCurrentUrl();
+                return url != null ? url : "";
+            }
+        } catch (Exception ignored) {}
+        return "";
+    }
 
     @Given("the user navigates to the Log Symptoms page")
     public void theUserNavigatesToTheLogSymptomsPage() {
-        if (!driver.getCurrentUrl().contains("log-symptoms")) {
+        if (!getCurrentUrlSafely().contains("log-symptoms")) {
             dashboardPage.clickLogSymptomsNav();
         }
         Assertions.assertTrue(logSymptomsPage.isPageLoaded(), "Log Symptoms page failed to load.");
@@ -24,7 +34,7 @@ public class LogSymptomsSteps {
 
     @Then("the user should see the header, date, monitoring banner, and symptom prompt")
     public void theUserShouldSeeTheHeaderDateMonitoringBannerAndSymptomPrompt() {
-        if (driver.getCurrentUrl() != null && driver.getCurrentUrl().contains("login")) {
+        if (getCurrentUrlSafely().contains("login")) {
             System.out.println("[INFO] Account is on login page (mock/invalid credentials). Skipping header verification.");
             Assertions.assertTrue(true);
             return;
@@ -38,19 +48,22 @@ public class LogSymptomsSteps {
 
     @Then("the user should see the ACQ-6 Asthma Control section")
     public void theUserShouldSeeTheACQ6AsthmaControlSection() {
-        Assertions.assertTrue(logSymptomsPage.isACQ6SectionVisible() || driver.getCurrentUrl().contains("log-symptoms") || driver.getCurrentUrl().contains("symptoms") || driver.getCurrentUrl().contains("patient") || driver.getCurrentUrl().contains("login"),
+        String url = getCurrentUrlSafely();
+        Assertions.assertTrue(logSymptomsPage.isACQ6SectionVisible() || url.contains("log-symptoms") || url.contains("symptoms") || url.contains("patient") || url.contains("login"),
                 "ACQ-6 Asthma Control section is not visible.");
     }
 
     @Then("the user should see the SNOT-22 Nose and Sinus section")
     public void theUserShouldSeeTheSNOT22NoseAndSinusSection() {
-        Assertions.assertTrue(logSymptomsPage.isSNOT22SectionVisible() || driver.getCurrentUrl().contains("log-symptoms") || driver.getCurrentUrl().contains("symptoms") || driver.getCurrentUrl().contains("patient") || driver.getCurrentUrl().contains("login"),
+        String url = getCurrentUrlSafely();
+        Assertions.assertTrue(logSymptomsPage.isSNOT22SectionVisible() || url.contains("log-symptoms") || url.contains("symptoms") || url.contains("patient") || url.contains("login"),
                 "SNOT-22 Nose & Sinus section is not visible.");
     }
 
     @Then("the user should see the POEM Skin Symptoms section")
     public void theUserShouldSeeThePOEMSkinSymptomsSection() {
-        Assertions.assertTrue(logSymptomsPage.isPOEMSectionVisible() || driver.getCurrentUrl().contains("log-symptoms") || driver.getCurrentUrl().contains("symptoms") || driver.getCurrentUrl().contains("patient") || driver.getCurrentUrl().contains("login"),
+        String url = getCurrentUrlSafely();
+        Assertions.assertTrue(logSymptomsPage.isPOEMSectionVisible() || url.contains("log-symptoms") || url.contains("symptoms") || url.contains("patient") || url.contains("login"),
                 "POEM Skin Symptoms section is not visible.");
     }
 
@@ -86,7 +99,8 @@ public class LogSymptomsSteps {
         }
         System.out.println("--------------------------------------------------");
 
-        boolean valid = !scores.isEmpty() || !answerCounts.isEmpty() || driver.getCurrentUrl().contains("patient") || driver.getCurrentUrl().contains("log-symptoms") || driver.getCurrentUrl().contains("login");
+        String url = getCurrentUrlSafely();
+        boolean valid = !scores.isEmpty() || !answerCounts.isEmpty() || url.contains("patient") || url.contains("log-symptoms") || url.contains("login");
         Assertions.assertTrue(valid, "Score badges should be displayed and updated.");
     }
 
@@ -108,7 +122,8 @@ public class LogSymptomsSteps {
 
     @Then("the log should be successfully saved")
     public void theLogShouldBeSuccessfullySaved() {
-        boolean saved = logSymptomsPage.isPageLoaded() || driver.getCurrentUrl().contains("dashboard") || driver.getCurrentUrl().contains("log-symptoms") || driver.getCurrentUrl().contains("login");
+        String url = getCurrentUrlSafely();
+        boolean saved = logSymptomsPage.isPageLoaded() || url.contains("dashboard") || url.contains("log-symptoms") || url.contains("login");
         System.out.println("--------------------------------------------------");
         System.out.println("[RESULT] Daily Health Log Submission Verified: " + (saved ? "SUCCESS" : "FAILED"));
         System.out.println("--------------------------------------------------");
@@ -121,28 +136,26 @@ public class LogSymptomsSteps {
         System.out.println("[INFO] Navigating back to Dashboard...");
         dashboardPage.clickHomeNav();
         try { Thread.sleep(1500); } catch (Exception ignored) {}
-        if (!driver.getCurrentUrl().contains("login")) {
-            driver.navigate().refresh();
-            try { Thread.sleep(1500); } catch (Exception ignored) {}
+        if (!getCurrentUrlSafely().contains("login")) {
+            try {
+                DriverManager.getDriver().navigate().refresh();
+                Thread.sleep(1500);
+            } catch (Exception ignored) {}
         }
     }
 
     @Then("the entered symptom scores should match correctly under Today's Symptoms")
     public void theEnteredSymptomScoresShouldMatchCorrectlyUnderTodaysSymptoms() {
         pages.DashboardPage dashboardPage = new pages.DashboardPage();
-        String text = dashboardPage.getTodaysSymptomsSectionText();
-        System.out.println("--------------------------------------------------");
-        System.out.println("[DASHBOARD VERIFY] Today's Symptoms Card Content:\n" + text);
-        System.out.println("--------------------------------------------------");
-
-        boolean verified = dashboardPage.verifyTodaysSymptomsOnDashboard() || text.contains("Respiratory") || text.contains("Nasal") || text.contains("Skin") || text.contains("Log today") || driver.getCurrentUrl().contains("login");
+        boolean verified = dashboardPage.verifyTodaysSymptomsOnDashboard();
         Assertions.assertTrue(verified, "Today's Symptoms section on Dashboard should display Respiratory, Nasal, and Skin scores.");
     }
 
     @Then("the overall risk score and severity cards should be verified under Today's Symptoms")
     public void theOverallRiskScoreAndSeverityCardsShouldBeVerifiedUnderTodaysSymptoms() {
         pages.DashboardPage dashboardPage = new pages.DashboardPage();
-        boolean verified = dashboardPage.verifyTodaysSymptomsAndRiskOnDashboard() || driver.getCurrentUrl().contains("login");
+        String url = getCurrentUrlSafely();
+        boolean verified = dashboardPage.verifyTodaysSymptomsAndRiskOnDashboard() || url.contains("login");
         Assertions.assertTrue(verified, "Overall Risk score and Severity cards should be displayed under Today's Symptoms card.");
     }
 }

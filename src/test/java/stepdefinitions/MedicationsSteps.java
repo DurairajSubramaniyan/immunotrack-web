@@ -144,7 +144,13 @@ public class MedicationsSteps {
         );
     }
 
-    // Avatar test intentionally removed.
+    @And("the user avatar {string} should be visible")
+    public void the_user_avatar_should_be_visible(String avatarText) {
+        Assert.assertTrue(
+                medicationsPage.getUserAvatarPS().isDisplayed(),
+                "User avatar is not visible"
+        );
+    }
 
     @And("the username {string} should be visible")
     public void the_username_should_be_visible(String username) {

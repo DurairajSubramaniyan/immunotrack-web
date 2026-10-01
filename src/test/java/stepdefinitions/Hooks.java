@@ -10,10 +10,21 @@ import utils.DriverManager;
 
 public class Hooks {
 
+    private static final ThreadLocal<Scenario> currentScenario = new ThreadLocal<>();
+
     @Before
-    public void setUp() {
+    public void setUp(Scenario scenario) {
+        currentScenario.set(scenario);
         // Initialize WebDriver before each scenario
         DriverManager.getDriver();
+    }
+
+    public static void log(String message) {
+        System.out.println(message);
+        Scenario scenario = currentScenario.get();
+        if (scenario != null) {
+            scenario.log(message);
+        }
     }
 
     @After
@@ -32,5 +43,6 @@ public class Hooks {
             // Quit the driver and clean up ThreadLocal
             DriverManager.quitDriver();
         }
+        currentScenario.remove();
     }
 }

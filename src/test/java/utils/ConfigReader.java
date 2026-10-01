@@ -21,9 +21,10 @@ public class ConfigReader {
 
     public static String getProperty(String key) {
         String sysProp = System.getProperty(key);
-        if (sysProp != null && !sysProp.isEmpty()) {
-            return sysProp;
+        if (sysProp != null && !sysProp.trim().isEmpty()) {
+            return sysProp.trim();
         }
-        return properties.getProperty(key);
+        String val = properties.getProperty(key);
+        return val != null ? val.trim() : null;
     }
 }

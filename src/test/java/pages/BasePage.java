@@ -97,4 +97,12 @@ public class BasePage {
             return false;
         }
     }
+    public boolean safeUrlContains(String fraction) {
+        try {
+            String currentUrl = driver.getCurrentUrl();
+            return currentUrl != null && currentUrl.contains(fraction);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

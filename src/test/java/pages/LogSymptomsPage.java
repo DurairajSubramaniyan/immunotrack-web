@@ -28,9 +28,9 @@ public class LogSymptomsPage extends BasePage {
     public boolean isPageLoaded() {
         try {
             waitForVisibility(pageTitle);
-            return pageTitle.isDisplayed() || driver.getCurrentUrl().contains("log-symptoms");
+            return pageTitle.isDisplayed() || safeUrlContains("log-symptoms");
         } catch (Exception e) {
-            return driver.getCurrentUrl().contains("log-symptoms");
+            return safeUrlContains("log-symptoms");
         }
     }
 
@@ -66,7 +66,7 @@ public class LogSymptomsPage extends BasePage {
             for (WebElement el : elements) {
                 if (el.isDisplayed()) return true;
             }
-            return driver.getCurrentUrl().contains("log-symptoms") || driver.getCurrentUrl().contains("symptoms") || driver.getCurrentUrl().contains("snot22") || driver.getCurrentUrl().contains("patient");
+            return safeUrlContains("log-symptoms") || safeUrlContains("symptoms") || safeUrlContains("snot22") || safeUrlContains("patient");
         } catch (Exception e) {
             return true;
         }
@@ -78,7 +78,7 @@ public class LogSymptomsPage extends BasePage {
             for (WebElement el : elements) {
                 if (el.isDisplayed()) return true;
             }
-            return driver.getCurrentUrl().contains("log-symptoms") || driver.getCurrentUrl().contains("symptoms") || driver.getCurrentUrl().contains("snot22") || driver.getCurrentUrl().contains("patient");
+            return safeUrlContains("log-symptoms") || safeUrlContains("symptoms") || safeUrlContains("snot22") || safeUrlContains("patient");
         } catch (Exception e) {
             return true;
         }
@@ -90,7 +90,7 @@ public class LogSymptomsPage extends BasePage {
             for (WebElement el : elements) {
                 if (el.isDisplayed()) return true;
             }
-            return driver.getCurrentUrl().contains("log-symptoms") || driver.getCurrentUrl().contains("symptoms") || driver.getCurrentUrl().contains("snot22") || driver.getCurrentUrl().contains("patient");
+            return safeUrlContains("log-symptoms") || safeUrlContains("symptoms") || safeUrlContains("snot22") || safeUrlContains("patient");
         } catch (Exception e) {
             return true;
         }
